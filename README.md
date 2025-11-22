@@ -327,9 +327,6 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -337,16 +334,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Built with ❤️ for the Ayurvedic community
 
 
-<div align="center">
-  Made with ❤️ by [Your Name](https://github.com/your-username)
-</div>
-
-### Frontend Deployment (Netlify/Vercel)
+### Frontend Deployment 
 1. Build the React app: `npm run build`
 2. Deploy the `client/build` folder
 3. Set environment variables for API URL
 
-### Backend Deployment (Heroku/Railway)
+### Backend Deployment 
 1. Set environment variables
 2. Deploy the server folder
 3. Configure MongoDB Atlas for production
@@ -359,9 +352,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
 
-This project is licensed under the MIT License.
 
 ## 🆘 Support
 
