@@ -1,0 +1,176 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Serif:wght@400;600;700&display=swap');
+
+:root {
+  /* Refined Ayurvedic palette */
+  --ayur-herbal: #2E7D32;        /* Herbal Green (primary brand) */
+  --ayur-deep-teal: #00695C;     /* CTA / headers */
+  --ayur-gold: #D4A017;          /* Golden Sand accents */
+  --ayur-lotus: #E9A6A6;         /* Lotus Pink accent */
+  --ayur-saffron: #F28C38;       /* Saffron (alerts/progress) */
+
+  --page-bg: #FAF9F6;            /* Lotus White */
+  --card-bg: #FFFFFF;            /* Surface cards */
+  --card-bg-soft: #E6CDB5;       /* Soft Clay (optional panels) */
+  --border-soft: #C8C8C8;        /* Ash Grey */
+
+  --text-primary: #2B2B2B;       /* Charcoal Black */
+  --text-secondary: #6E6E6E;     /* Warm Grey */
+  --text-heading: #2B2B2B;       /* Heading color */
+
+  /* Legacy aliases for helpers */
+  --ayur-sage: var(--ayur-herbal);
+  --ayur-cta: var(--ayur-deep-teal);
+}
+
+/* Ayur theme helpers */
+.ayur-page { background: var(--page-bg); }
+.ayur-card { background: var(--card-bg); border: 1px solid var(--border-soft); border-radius: 16px; }
+.ayur-card-soft { background: var(--card-bg-soft); border: 1px solid var(--border-soft); border-radius: 16px; }
+.ayur-title { color: var(--text-heading); font-family: 'Noto Serif', serif; }
+.ayur-accent { color: var(--ayur-sage); }
+.ayur-cta-btn { background: var(--ayur-cta); color: #fff; }
+.ayur-cta-btn:hover { background: #055a50; }
+.ayur-highlight { color: var(--ayur-turmeric); }
+
+/* Base typography */
+body { font-family: 'Poppins', system-ui, -apple-system, sans-serif; color: var(--text-primary); }
+h1, h2, h3, .heading-serif { font-family: 'Noto Serif', serif; color: var(--text-heading); }
+
+/* Default state for print-only blocks */
+.print-block { display: none; }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Legacy gradients can be replaced by theme helpers as needed */
+
+/* Global overrides to align old class names with the new palette */
+.text-health\.dark { color: var(--text-heading) !important; }
+.bg-ayurvedic\.green { background-color: var(--ayur-cta) !important; }
+.text-ayurvedic\.green { color: var(--ayur-cta) !important; }
+.border-green-100 { border-color: var(--border-soft) !important; }
+.bg-green-50 { background-color: var(--card-bg-soft) !important; }
+.text-emerald-700 { color: var(--ayur-herbal) !important; }
+.bg-emerald-50 { background-color: var(--card-bg-soft) !important; }
+.text-blue-600 { color: var(--ayur-deep-teal) !important; }
+.text-blue-800 { color: var(--ayur-deep-teal) !important; }
+.text-rose-700 { color: var(--ayur-saffron) !important; }
+.border-emerald-100 { border-color: var(--border-soft) !important; }
+.hover\:text-ayurvedic\.green:hover { color: var(--ayur-cta) !important; }
+.hover\:border-ayurvedic\.green:hover { border-color: var(--ayur-cta) !important; }
+
+.health-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.medical-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.stats-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-left: 4px solid #10b981;
+}
+
+.dosha-vata {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.dosha-pitta {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.dosha-kapha {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.taste-sweet { color: #10b981; }
+.taste-sour { color: #f59e0b; }
+.taste-salty { color: #3b82f6; }
+.taste-pungent { color: #ef4444; }
+.taste-bitter { color: #8b5cf6; }
+.taste-astringent { color: #6b7280; }
+
+.nutrition-bar {
+  height: 8px;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+  stroke-dashoffset: 251.2;
+  transition: stroke-dashoffset 0.35s;
+  transform-origin: 50% 50%;
+}
+
+/* Print styles for A4 PDF-like output */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+
+  html, body, #root {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide interactive-only elements */
+  .print-hidden { display: none !important; }
+  button, a, .modal-overlay { display: none !important; }
+
+  /* Show print-only blocks */
+  .print-block { display: block !important; }
+
+  /* Cards and borders optimized for print */
+  .medical-card,
+  .print-card {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important; /* gray-200 */
+    background: #fff !important;
+  }
+
+  /* Typography tweaks */
+  .print-title { font-size: 20pt; font-weight: 700; color: #111827; }
+  .print-subtitle { font-size: 12pt; color: #374151; }
+  .print-label { font-size: 9pt; color: #6b7280; }
+  .print-text { font-size: 10pt; color: #1f2937; }
+
+  /* Grid adjustments for print */
+  .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Page breaks */
+  .break-after { page-break-after: always; }
+  .avoid-break { break-inside: avoid; }
+}
+
+
+
+
+
+

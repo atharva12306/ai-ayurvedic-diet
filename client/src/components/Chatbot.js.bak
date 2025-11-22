@@ -1,0 +1,527 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  MessageCircle,
+  Send,
+  Bot,
+  User,
+  AlertTriangle,
+  Lightbulb,
+  Heart,
+  Leaf,
+  Zap,
+  X,
+} from 'lucide-react';
+import { usePatients } from '../contexts/PatientContext';
+
+const Chatbot = ({ onPatientUpdate }) => {
+  const { selectedPatient } = usePatients();
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    // Initialize with welcome message
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: 1,
+          type: 'bot',
+          content: 'Namaste! I\'m your Ayurvedic AI assistant. I can help you with diet recommendations, food properties, dosha analysis, and general Ayurvedic guidance. How can I assist you today?',
+          timestamp: new Date()
+        }
+      ]);
+    }
+  }, []);
+
+  const quickQuestions = [
+    'What foods are good for Vata dosha?',
+    'How to balance Pitta dosha?',
+    'What are the benefits of turmeric?',
+    'How to improve digestion?',
+    'What should I eat for breakfast?',
+    'How to reduce inflammation naturally?'
+  ];
+
+  const generateAIResponse = (userMessage) => {
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // Simple keyword-based responses (in a real app, this would connect to an AI service)
+    if (lowerMessage.includes('vata') || lowerMessage.includes('vata dosha')) {
+      return {
+        content: 'For Vata dosha, focus on warm, cooked, and grounding foods. Include:\n\n• Warm, cooked grains like rice and quinoa\n• Root vegetables like sweet potatoes and carrots\n• Healthy fats like ghee and olive oil\n• Warm spices like ginger, cinnamon, and cardamom\n• Cooked fruits and warm beverages\n\nAvoid cold, raw foods and excessive caffeine.',
+        suggestions: ['Vata-pacifying recipes', 'Best spices for Vata', 'Vata lifestyle tips']
+      };
+    } else if (lowerMessage.includes('pitta') || lowerMessage.includes('pitta dosha')) {
+      return {
+        content: 'To balance Pitta dosha, choose cooling and calming foods:\n\n• Sweet, bitter, and astringent tastes\n• Cooling vegetables like cucumber and leafy greens\n• Sweet fruits like melons and grapes\n• Dairy products like milk and ghee\n• Cooling herbs like mint and coriander\n\nAvoid spicy, sour, and salty foods that can aggravate Pitta.',
+        suggestions: ['Pitta-pacifying recipes', 'Cooling foods list', 'Pitta lifestyle tips']
+      };
+    } else if (lowerMessage.includes('kapha') || lowerMessage.includes('kapha dosha')) {
+      return {
+        content: 'For Kapha dosha, choose light, warm, and stimulating foods:\n\n• Light, dry grains like barley and quinoa\n• Pungent, bitter, and astringent tastes\n• Warming spices like ginger, black pepper, and cayenne\n• Light, cooked vegetables\n• Warm beverages and herbal teas\n\nAvoid heavy, oily, and cold foods that can increase Kapha.',
+        suggestions: ['Kapha-pacifying recipes', 'Light foods for Kapha', 'Kapha lifestyle tips']
+      };
+    } else if (lowerMessage.includes('turmeric') || lowerMessage.includes('curcumin')) {
+      return {
+        content: 'Turmeric is a powerful Ayurvedic herb with numerous benefits:\n\n• Anti-inflammatory properties\n• Supports liver function\n• Aids digestion\n• Boosts immunity\n• Natural antioxidant\n\nBest consumed with black pepper and healthy fats for better absorption. Use in cooking or as golden milk.',
+        suggestions: ['Golden milk recipe', 'Turmeric supplements', 'Turmeric in cooking']
+      };
+    } else if (lowerMessage.includes('digestion') || lowerMessage.includes('digestive')) {
+      return {
+        content: 'To improve digestion naturally:\n\n• Eat at regular times\n• Include digestive spices like ginger, cumin, and fennel\n• Drink warm water throughout the day\n• Practice mindful eating\n• Include fiber-rich foods\n• Avoid overeating and cold drinks with meals\n\nTry ginger tea or triphala for digestive support.',
+        suggestions: ['Digestive tea recipes', 'Best digestive spices', 'Meal timing tips']
+      };
+    } else if (lowerMessage.includes('breakfast') || lowerMessage.includes('morning meal')) {
+      return {
+        content: 'For a healthy Ayurvedic breakfast:\n\n• Warm, cooked foods are ideal\n• Include grains like oatmeal or rice\n• Add warming spices like cinnamon and cardamom\n• Include healthy fats like ghee or nuts\n• Avoid cold, raw foods in the morning\n• Eat within 2 hours of waking up\n\nConsider porridge, warm fruit, or cooked grains with spices.',
+        suggestions: ['Ayurvedic breakfast recipes', 'Morning routine tips', 'Best breakfast foods']
+      };
+    } else if (lowerMessage.includes('inflammation') || lowerMessage.includes('anti-inflammatory')) {
+      return {
+        content: 'To reduce inflammation naturally:\n\n• Include turmeric, ginger, and garlic in your diet\n• Eat omega-3 rich foods like flaxseeds and walnuts\n• Include colorful fruits and vegetables\n• Avoid processed and fried foods\n• Stay hydrated with warm water\n• Practice stress management techniques\n\nConsider herbal teas and anti-inflammatory spices.',
+        suggestions: ['Anti-inflammatory foods', 'Herbal remedies', 'Lifestyle changes']
+      };
+    } else {
+      return {
+        content: 'I understand you\'re asking about Ayurveda and health. While I can provide general guidance, please remember that I\'m an AI assistant and my responses should not replace professional medical advice. For specific health concerns, always consult with a qualified Ayurvedic practitioner or healthcare provider.\n\nCould you please rephrase your question or ask about a specific aspect of Ayurveda, such as doshas, foods, or lifestyle practices?',
+        suggestions: ['Dosha analysis', 'Food recommendations', 'General Ayurvedic principles']
+      };
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
+
+    const userMessage = {
+      id: Date.now(),
+      type: 'user',
+      content: inputMessage,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsTyping(true);
+
+    try {
+      // Check if this is a dosha analysis result
+      const isDoshaResult = inputMessage.includes('Mapped to') && 
+                           (inputMessage.includes('Vata') || 
+                            inputMessage.includes('Pitta') || 
+                            inputMessage.includes('Kapha'));
+
+      let botMessage;
+      
+      if (isDoshaResult && selectedPatient) {
+        // Extract the dosha from the message
+        const doshaMatch = inputMessage.match(/Mapped to\s+(Vata|Pitta|Kapha)/i);
+        const dosha = doshaMatch ? doshaMatch[1] : null;
+        
+        if (dosha) {
+          // Update patient's dosha in the database
+          try {
+            const response = await fetch(`/api/patients/${selectedPatient._id}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                'healthProfile.prakriti': dosha
+              })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.message || 'Failed to update patient data');
+            }
+
+            // Refresh the patient data
+            if (onPatientUpdate) {
+              onPatientUpdate({ ...selectedPatient, healthProfile: { ...selectedPatient.healthProfile, prakriti: dosha } });
+            }
+
+            // Create a success message
+            botMessage = {
+              id: Date.now() + 1,
+              type: 'bot',
+              content: `✅ Successfully updated ${selectedPatient.name}'s dosha to ${dosha}.`,
+              timestamp: new Date()
+            };
+          } catch (updateError) {
+            console.error('Error updating patient data:', updateError);
+            botMessage = {
+              id: Date.now() + 1,
+              type: 'bot',
+              content: `❌ Failed to save patient data: ${updateError.message || 'Unknown error'}. Please try again or update manually.`,
+              timestamp: new Date()
+            };
+          }
+          
+          setMessages(prev => [...prev, botMessage]);
+          setIsTyping(false);
+          return;
+        }
+      }
+      
+      // Regular chatbot message handling
+      const response = await fetch('/api/chatbot/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          message: inputMessage,
+          context: {
+            selectedPatient: selectedPatient ? {
+              id: selectedPatient._id,
+              name: selectedPatient.name,
+              age: selectedPatient.age,
+              gender: selectedPatient.gender,
+              prakriti: selectedPatient.prakriti
+            } : null
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from server');
+      }
+
+      const data = await response.json();
+      
+      botMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: data.response,
+        suggestions: data.suggestions,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: 'I\'m having trouble connecting to the server. Please try again later.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+    } else {
+        // Regular chatbot message
+        const response = await fetch('/api/chatbot/message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            message: inputMessage,
+            context: {
+              selectedPatient: selectedPatient ? {
+                id: selectedPatient._id,
+                name: selectedPatient.name,
+                age: selectedPatient.age,
+                gender: selectedPatient.gender,
+                prakriti: selectedPatient.prakriti
+              } : null
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get response from server');
+        }
+
+        const data = await response.json();
+        
+        botMessage = {
+          id: Date.now() + 1,
+          type: 'bot',
+          content: data.response,
+          suggestions: data.suggestions,
+          timestamp: new Date()
+        };
+      }
+
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: 'I\'m having trouble connecting to the server. Please try again later.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleQuickQuestion = (question) => {
+    setInputMessage(question);
+  };
+
+  const handleSuggestion = (suggestion) => {
+    setInputMessage(suggestion);
+  };
+
+  const clearChat = () => {
+    setMessages([
+      {
+        id: 1,
+        type: 'bot',
+        content: 'Namaste! I\'m your Ayurvedic AI assistant. I can help you with diet recommendations, food properties, dosha analysis, and general Ayurvedic guidance. How can I assist you today?',
+        timestamp: new Date()
+      }
+    ]);
+  };
+
+  const MessageBubble = ({ message }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
+    >
+      <div className={`flex max-w-xs lg:max-w-md ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+          message.type === 'user' 
+            ? 'bg-ayurvedic.green text-white ml-3' 
+            : 'bg-gray-200 text-gray-600 mr-3'
+        }`}>
+          {message.type === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+        </div>
+        <div className={`rounded-lg px-4 py-2 ${
+          message.type === 'user'
+            ? 'bg-ayurvedic.green text-white'
+            : 'bg-white border border-gray-200 text-gray-800'
+        }`}>
+          <p className="text-sm whitespace-pre-line">{message.content}</p>
+          {message.suggestions && (
+            <div className="mt-3 space-y-1">
+              {message.suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestion(suggestion)}
+                  className="block w-full text-left text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsMinimized(false)}
+          className="bg-ayurvedic.green text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </motion.button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-health.light">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <MessageCircle className="h-8 w-8 text-ayurvedic.green mr-3" />
+              <h1 className="text-2xl font-bold text-health.dark">AI Ayurvedic Assistant</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={clearChat}
+                className="flex items-center px-4 py-2 text-gray-600 hover:text-ayurvedic.green border border-gray-300 rounded-lg hover:border-ayurvedic.green transition-colors"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Clear Chat
+              </button>
+              <button
+                onClick={() => setIsMinimized(true)}
+                className="p-2 text-gray-600 hover:text-ayurvedic.green"
+              >
+                <Minimize2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Disclaimer */}
+        {showDisclaimer && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6"
+          >
+            <div className="flex items-start">
+              <AlertTriangle className="w-5 h-5 text-yellow-600 mr-3 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-medium text-yellow-800 mb-1">Important Disclaimer</h3>
+                <p className="text-yellow-700 text-sm">
+                  This AI assistant provides general Ayurvedic guidance and should not replace professional medical advice. 
+                  Always consult with a qualified Ayurvedic practitioner or healthcare provider for specific health concerns.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDisclaimer(false)}
+                className="text-yellow-600 hover:text-yellow-800 ml-2"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Selected Patient Info */}
+        {selectedPatient && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6"
+          >
+            <div className="flex items-center">
+              <Heart className="w-5 h-5 text-green-600 mr-2" />
+              <span className="text-green-800 font-medium">
+                Currently assisting: {selectedPatient.name} ({selectedPatient.prakriti} dosha)
+              </span>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Quick Questions */}
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          <h3 className="text-lg font-semibold text-health.dark mb-4">Quick Questions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {quickQuestions.map((question, index) => (
+              <motion.button
+                key={index}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleQuickQuestion(question)}
+                className="text-left p-3 border border-gray-200 rounded-lg hover:border-ayurvedic.green hover:bg-green-50 transition-colors"
+              >
+                <p className="text-sm text-gray-700">{question}</p>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Chat Interface */}
+        <div className="bg-white rounded-lg shadow-sm border h-96 flex flex-col">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <AnimatePresence>
+              {messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))}
+            </AnimatePresence>
+            
+            {isTyping && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex justify-start mb-4"
+              >
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 mr-3 flex items-center justify-center">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex space-x-3">
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Ask about Ayurveda, doshas, foods, or health..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ayurvedic.green focus:border-transparent"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim()}
+                className="px-4 py-2 bg-ayurvedic.green text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Features */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+            <Lightbulb className="w-8 h-8 text-yellow-500 mx-auto mb-3" />
+            <h3 className="font-semibold text-health.dark mb-2">Smart Recommendations</h3>
+            <p className="text-sm text-gray-600">
+              Get personalized diet and lifestyle recommendations based on Ayurvedic principles
+            </p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+            <Leaf className="w-8 h-8 text-green-500 mx-auto mb-3" />
+            <h3 className="font-semibold text-health.dark mb-2">Herbal Guidance</h3>
+            <p className="text-sm text-gray-600">
+              Learn about herbs, spices, and their therapeutic properties in Ayurveda
+            </p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+            <Zap className="w-8 h-8 text-blue-500 mx-auto mb-3" />
+            <h3 className="font-semibold text-health.dark mb-2">Instant Answers</h3>
+            <p className="text-sm text-gray-600">
+              Get quick answers to your Ayurvedic questions and health concerns
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Chatbot;
+
+
