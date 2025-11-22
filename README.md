@@ -336,11 +336,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Thanks to all contributors who have helped shape this project
 - Built with ❤️ for the Ayurvedic community
 
-## 📧 Contact
-
-For any queries, please reach out to [your-email@example.com](mailto:your-email@example.com)
-
----
 
 <div align="center">
   Made with ❤️ by [Your Name](https://github.com/your-username)
